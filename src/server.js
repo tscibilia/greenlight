@@ -150,7 +150,7 @@ app.delete('/api/filters/:id/allowlist', async (req, res) => {
 const indexPath = path.join(__dirname, '..', 'public', 'index.html');
 const indexTemplate = fs.readFileSync(indexPath, 'utf8');
 
-app.get('*', (req, res) => {
+app.get('/{*splat}', (req, res) => {
   const html = indexTemplate.replace(
     '<script src="app.js"></script>',
     `<script nonce="${res.locals.cspNonce}" src="app.js"></script>`
