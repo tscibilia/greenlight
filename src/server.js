@@ -1,4 +1,6 @@
+const crypto = require('node:crypto');
 const express = require('express');
+const fs = require('node:fs');
 const path = require('node:path');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
@@ -44,20 +46,30 @@ if (UNIFI_API_KEY) {
 }
 
 // --- Middleware ---
+
+// Generate a per-request nonce so scripts load even behind reverse proxies
+// (e.g. Authentik forward auth) where 'self' can be blocked.
+app.use((req, res, next) => {
+  res.locals.cspNonce = crypto.randomBytes(16).toString('base64');
+  next();
+});
+
 app.use(
   helmet({
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
         styleSrc: ["'self'", "'unsafe-inline'"],
-        scriptSrc: ["'self'"],
+        scriptSrc: ["'self'", (req, res) => `'nonce-${res.locals.cspNonce}'`],
         imgSrc: ["'self'", 'data:'],
       },
     },
   })
 );
 app.use(express.json());
-app.use(express.static(path.join(__dirname, '..', 'public')));
+app.use(express.static(path.join(__dirname, '..', 'public'), {
+  index: false, // Don't serve index.html as static — we inject a nonce below
+}));
 
 // Rate limit API calls — prevent accidental spam from the UI
 const apiLimiter = rateLimit({
@@ -134,9 +146,16 @@ app.delete('/api/filters/:id/allowlist', async (req, res) => {
   }
 });
 
-// --- SPA fallback ---
+// --- SPA fallback (injects CSP nonce into index.html) ---
+const indexPath = path.join(__dirname, '..', 'public', 'index.html');
+const indexTemplate = fs.readFileSync(indexPath, 'utf8');
+
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '..', 'public', 'index.html'));
+  const html = indexTemplate.replace(
+    '<script src="app.js"></script>',
+    `<script nonce="${res.locals.cspNonce}" src="app.js"></script>`
+  );
+  res.type('html').send(html);
 });
 
 // --- Start ---
