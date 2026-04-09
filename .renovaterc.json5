@@ -1,0 +1,67 @@
+{
+  $schema: "https://docs.renovatebot.com/renovate-schema.json",
+  extends: [
+    "config:recommended",
+    "docker:enableMajor",
+    "docker:pinDigests",
+    "helpers:pinGitHubActionDigests",
+    ":automergeBranch",
+    ":dependencyDashboard",
+    ":disableRateLimiting",
+    ":semanticCommits",
+    ":separateMajorReleases",
+    "group:monorepos",
+    "group:recommended",
+    "replacements:all",
+    "workarounds:all"
+  ],
+  dependencyDashboard: true,
+  dependencyDashboardTitle: "Renovate Dashboard :robot:",
+  schedule: ["every weekend"],
+  vulnerabilityAlerts: {
+    labels: ["security"],
+    schedule: ["at any time"],
+    dependencyDashboardApproval: false,
+    minimumReleaseAge: null,
+    rangeStrategy: "update-lockfile",
+    commitMessageSuffix: "[SECURITY]"
+  },
+  lockFileMaintenance: {
+    enabled: true,
+    automerge: true,
+    automergeType: "branch",
+    schedule: ["before 5am on monday"]
+  },
+  packageRules: [
+    {
+      description: "Auto-merge GitHub Actions",
+      matchManagers: ["github-actions"],
+      automerge: true,
+      automergeType: "branch",
+      matchUpdateTypes: ["minor", "patch", "digest"],
+      minimumReleaseAge: "3 days",
+      ignoreTests: true
+    },
+    {
+      description: "Auto-merge non-major npm dependencies",
+      matchManagers: ["npm"],
+      matchUpdateTypes: ["minor", "patch"],
+      automerge: true,
+      automergeType: "branch",
+      minimumReleaseAge: "3 days"
+    },
+    {
+      description: "Group non-major Docker updates",
+      matchManagers: ["dockerfile"],
+      matchUpdateTypes: ["minor", "patch", "digest"],
+      groupName: "docker non-major",
+      automerge: true,
+      automergeType: "branch"
+    },
+    {
+      description: "Require approval for major updates",
+      matchUpdateTypes: ["major"],
+      dependencyDashboardApproval: true
+    },
+  ],
+}
