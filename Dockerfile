@@ -1,12 +1,12 @@
 # --- Build stage: install production deps only ---
-FROM node:24-alpine AS deps
+FROM node:24-alpine@sha256:01743339035a5c3c11a373cd7c83aeab6ed1457b55da6a69e014a95ac4e4700b AS deps
 
 WORKDIR /app
 COPY package.json package-lock.json* ./
 RUN npm ci --omit=dev 2>/dev/null || npm install --omit=dev
 
 # --- Runtime stage: minimal image ---
-FROM node:24-alpine
+FROM node:24-alpine@sha256:01743339035a5c3c11a373cd7c83aeab6ed1457b55da6a69e014a95ac4e4700b
 
 # Configurable UID/GID — override at build or runtime
 ARG APP_UID=1000
