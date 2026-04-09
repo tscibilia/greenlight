@@ -8,8 +8,8 @@
     "dev": "node --watch src/server.js"
   },
   "dependencies": {
-    "express": "^4.21.0",
-    "helmet": "^8.0.0",
-    "express-rate-limit": "^8.0.0"
+    "express": "^5.1.0",
+    "express-rate-limit": "^8.0.0",
+    "helmet": "^8.0.0"
   }
 }
