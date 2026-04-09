@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Greenlight</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🟢 Greenlight</h1>
+      <p class="subtitle">Add or remove websites from the allowlist</p>
+    </header>
+
+    <div id="loading" class="loading">Loading filters…</div>
+    <div id="error" class="error" hidden></div>
+
+    <main id="main" hidden>
+      <!-- Filter selector (hidden if only one filter) -->
+      <div id="filter-selector" class="filter-selector" hidden>
+        <label for="filter-select">Filter:</label>
+        <select id="filter-select"></select>
+      </div>
+
+      <!-- Add domain form -->
+      <form id="add-form" class="add-form">
+        <label for="domain-input">Website to unblock:</label>
+        <div class="input-row">
+          <input
+            type="text"
+            id="domain-input"
+            placeholder="example.com"
+            autocomplete="off"
+            autocapitalize="none"
+            spellcheck="false"
+            required
+          >
+          <button type="submit" id="add-btn">Unblock</button>
+        </div>
+        <p class="hint">Enter a domain like <code>example.com</code> — no https:// needed</p>
+      </form>
+
+      <!-- Status message -->
+      <div id="status" class="status" hidden></div>
+
+      <!-- Current allowlist -->
+      <section id="allowlist-section">
+        <h2>Currently Allowed</h2>
+        <div id="allowlist-empty" class="empty" hidden>No domains in the allowlist yet.</div>
+        <ul id="allowlist"></ul>
+      </section>
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

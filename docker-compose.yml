@@ -1,0 +1,25 @@
+services:
+  greenlight:
+    build:
+      context: .
+      args:
+        APP_UID: ${APP_UID:-1000}
+        APP_GID: ${APP_GID:-1000}
+    container_name: greenlight
+    restart: unless-stopped
+    # Override UID/GID at runtime (takes precedence over Dockerfile USER)
+    # user: "${APP_UID:-1000}:${APP_GID:-1000}"
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    # Optional: restrict to your LAN
+    # networks:
+    #   - lan
