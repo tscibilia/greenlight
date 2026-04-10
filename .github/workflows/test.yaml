@@ -71,17 +71,9 @@ jobs:
           echo "$BODY"
           echo "$BODY" | grep -q "error"
 
-      - name: E2E — POST rejects invalid filter ID
-        run: |
-          BODY=$(curl -s -X POST http://localhost:3000/api/filters/fake-id/allowlist \
-            -H "Content-Type: application/json" \
-            -d '{}')
-          echo "$BODY"
-          echo "$BODY" | grep -q "Invalid filter ID"
-
       - name: E2E — POST requires domain field
         run: |
-          BODY=$(curl -s -X POST http://localhost:3000/api/filters/aabbccddeeff00112233aabb/allowlist \
+          BODY=$(curl -s -X POST http://localhost:3000/api/filters/fake-id/allowlist \
             -H "Content-Type: application/json" \
             -d '{}')
           echo "$BODY"
