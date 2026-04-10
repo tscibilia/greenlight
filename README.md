@@ -4,6 +4,7 @@
 
 [![GitHub Release](https://img.shields.io/github/v/release/tscibilia/greenlight?style=for-the-badge&sort=semver)](https://github.com/tscibilia/greenlight/releases)&nbsp;&nbsp;
 [![Build](https://img.shields.io/github/actions/workflow/status/tscibilia/greenlight/build.yaml?style=for-the-badge)](https://github.com/tscibilia/greenlight/actions/workflows/build.yaml)&nbsp;&nbsp;
+[![Security](https://img.shields.io/github/actions/workflow/status/tscibilia/greenlight/security.yaml?style=for-the-badge&label=security)](https://github.com/tscibilia/greenlight/security/code-scanning)&nbsp;&nbsp;
 [![License](https://img.shields.io/github/license/tscibilia/greenlight?style=for-the-badge)](https://github.com/tscibilia/greenlight/blob/main/LICENSE)&nbsp;&nbsp;
 
 </div>
