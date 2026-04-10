@@ -81,13 +81,6 @@ const apiLimiter = rateLimit({
 });
 app.use('/api', apiLimiter);
 
-// --- Validation helpers ---
-
-// Filter IDs are MongoDB ObjectIds (24 hex chars) or UUIDs
-function isValidFilterId(id) {
-  return /^[a-f0-9]{24}$/.test(id) || /^[a-f0-9-]{36}$/.test(id);
-}
-
 // --- API Routes ---
 
 // List all content filters (or the one specified by FILTER_ID)
@@ -112,9 +105,6 @@ app.get('/api/filters', async (req, res) => {
 
 // Get a specific filter's details
 app.get('/api/filters/:id', async (req, res) => {
-  if (!isValidFilterId(req.params.id)) {
-    return res.status(400).json({ error: 'Invalid filter ID' });
-  }
   try {
     const filter = await client.getContentFilter(req.params.id);
     res.json(filter);
@@ -126,16 +116,10 @@ app.get('/api/filters/:id', async (req, res) => {
 
 // Add a domain to a filter's allowlist
 app.post('/api/filters/:id/allowlist', async (req, res) => {
-  if (!isValidFilterId(req.params.id)) {
-    return res.status(400).json({ error: 'Invalid filter ID' });
-  }
   try {
     const { domain } = req.body;
-    if (!domain || typeof domain !== 'string') {
+    if (!domain) {
       return res.status(400).json({ error: 'domain is required' });
-    }
-    if (domain.length > 253) {
-      return res.status(400).json({ error: 'Domain too long (max 253 characters)' });
     }
 
     const result = await client.addToAllowlist(req.params.id, domain);
@@ -148,12 +132,9 @@ app.post('/api/filters/:id/allowlist', async (req, res) => {
 
 // Remove a domain from a filter's allowlist
 app.delete('/api/filters/:id/allowlist', async (req, res) => {
-  if (!isValidFilterId(req.params.id)) {
-    return res.status(400).json({ error: 'Invalid filter ID' });
-  }
   try {
     const { domain } = req.body;
-    if (!domain || typeof domain !== 'string') {
+    if (!domain) {
       return res.status(400).json({ error: 'domain is required' });
     }
 

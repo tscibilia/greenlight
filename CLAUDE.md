@@ -48,22 +48,10 @@ All config is via environment variables (see `.env.example`). Required: `UNIFI_H
 
 The container runs as non-root (UID/GID 1000 by default, configurable via `APP_UID`/`APP_GID` build args), with a read-only filesystem, all capabilities dropped, and no privilege escalation.
 
-## Security
-
-Input validation is enforced at multiple layers — do not weaken any of these:
-
-- **Domain regex** (`unifi-client.js:addToAllowlist`): Only allows `^[a-z0-9]([a-z0-9-]*\.)+[a-z]{2,}$` after normalization. This is the primary injection gate.
-- **Type + length checks** (`server.js`): Domain must be a string, max 253 chars. Rejects non-string payloads (objects/arrays).
-- **Filter ID validation** (`server.js:isValidFilterId`): Route `:id` params are validated as MongoDB ObjectIds (24 hex) or UUIDs (36 hex+dashes) before being interpolated into UniFi API paths.
-- **HTML escaping** (`app.js:escapeHtml`): All domain values are escaped before DOM insertion.
-- **CSP with nonces** (`server.js`): Helmet enforces strict Content-Security-Policy with per-request script nonces.
-- **Rate limiting**: 30 req/min on `/api` routes.
-
-Domain values are placed into a JSON array sent to the UniFi API — never interpolated into shell commands, URL paths, or queries. There is no path from domain input to command execution on the router.
-
 ## Potential Pitfalls
 
 - **Auth failure:** Ensure `UNIFI_API_KEY` or both username/password are set
 - **Self-signed cert:** The HTTPS client has `rejectUnauthorized: false` — don't remove it
+- **Domain validation:** Regex in `unifi-client.js` rejects invalid formats; normalize first
 - **Filter ID mismatch:** Some UniFi versions use `_id`, others use `id`; check both
 - **Session expiry:** API key auth doesn't need re-login; password auth auto-retries on 401
