@@ -40,8 +40,8 @@ securityContext:
 
 ### Image
 
-- Based on `node:22-alpine` (minimal attack surface)
-- No shell utilities or package managers in the final image layer
+- Based on `node:24-alpine` (minimal attack surface)
+- npm, yarn, and corepack are stripped from the runtime image
 - Images are signed and built via GitHub Actions — verify with `cosign` if needed
 
 ## Supported Versions
