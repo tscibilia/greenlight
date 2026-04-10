@@ -131,15 +131,30 @@ securityContext:
 
 ## Security
 
-The Docker container follows least-privilege principles:
+### Container Hardening
 
-- **Non-root user** — configurable UID/GID
-- **Read-only filesystem** — only `/tmp` is writable
-- **All capabilities dropped** — `cap_drop: ALL`
-- **No privilege escalation** — `security_opt: no-new-privileges`
-- **Rate limiting** — 30 requests/minute on API endpoints
-- **Helmet** — CSP headers, XSS protection
-- **Self-signed TLS** — accepted for UDM connections (standard for local controllers)
+The Docker container follows least-privilege principles to minimize blast radius:
+
+- **Non-root user** — runs as UID/GID 1000 by default (configurable via build args)
+- **Read-only filesystem** — only `/tmp` is writable; no persistent state in the container
+- **All capabilities dropped** — `cap_drop: ALL`, no Linux kernel capabilities granted
+- **No privilege escalation** — `security_opt: no-new-privileges` prevents setuid/setgid binaries
+- **Self-signed TLS** — accepted for UDM connections (standard for local UniFi controllers)
+
+### Input Validation & Injection Prevention
+
+All user input is validated and sanitized at multiple layers to prevent XSS, injection, and abuse:
+
+- **Strict domain regex** — the backend only accepts domains matching `^[a-z0-9]([a-z0-9-]*\.)+[a-z]{2,}$`, rejecting any input containing JavaScript, HTML, special characters, or path traversal attempts
+- **Input normalization** — domains are lowercased with protocols, `www.` prefixes, paths, and whitespace stripped before validation
+- **Type and length enforcement** — domain input must be a string of 253 characters or fewer (the DNS maximum)
+- **Filter ID validation** — route parameters are validated against MongoDB ObjectId / UUID formats, preventing path manipulation in upstream API calls
+- **HTML escaping** — all domain values are escaped before rendering in the frontend
+- **Content Security Policy** — Helmet enforces strict CSP headers with per-request script nonces, blocking inline script injection even if a value were somehow rendered unescaped
+- **Rate limiting** — API endpoints are capped at 30 requests/minute to prevent brute-force or spam abuse
+- **JSON-only API** — the server only accepts `application/json` request bodies, eliminating form-based CSRF vectors
+
+> **Note:** Domain values are sent to the UniFi controller as string elements in a JSON array. They are never interpolated into shell commands, URL paths, or database queries — there is no path from the domain input to command execution on the router.
 
 ## How It Works
 
