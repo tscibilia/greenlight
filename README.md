@@ -22,6 +22,11 @@
 
 ## Quick Start
 
+### 0. Requirements
+
+- UniFi OS >= 3.x
+- UniFi Network >= 8.2.93
+
 ### 1. Clone and configure
 
 ```bash
@@ -81,13 +86,67 @@ Click the below headers to view the instructions:
 
 API key authentication is the recommended method. It avoids session management overhead, doesn't expire on idle, and works with UniFi Network v9.0.0 and later.
 
-1. Log into your UniFi controller
-2. Go to **Settings > Admins**
-3. Select your admin account
-4. Create an API key under **API Keys**
-5. Set `UNIFI_API_KEY` in your `.env`
+1. Open your UniFi controller/Console's admin page either via [unifi.ui.com](https://unifi.ui.com) or via the IP address of your controller
+
+2. On the left navigation bar (that runs the length of the page) click the *people* icon (`Admin & Users`)
+
+3. Click `+ Create New` at the top of the page and fill it out using the below details
+
+| Field Name                    | Value                                   |
+|-------------------------------|-----------------------------------------|
+| First name                    | `Greenlight`                            |
+| Last name                     | `UnifiApi`                              |
+| Admin                         | :white_check_mark:                      |
+| Restrict to local access only | :white_check_mark:                      |
+| Username                      | `greenlight`                            |
+| Password                      | Make up a password, but make note of it |
+| Use a pre defined role        | :white_check_mark:                      |
+| Role                          | `Super Admin`                           |
+
+Your user should now look like the below
+
+![UniFi Creating super admin](assets/unifi-user-api-superadmin.png)
+
+4. Login to your console as the user you have just created. This will need to be done via the controller's IP address
+
+5. On the left navigation bar (that runs the length of the page) click the <picture><source media="(prefers-color-scheme: dark)" srcset="assets/connect-darkmode.png"><img src="assets/connect-lightmode.png" alt="connection" width="20" height="20"></picture> icon (`Integrations`)
+
+Give the API key a name, something like `greenlight`
+
+Copy this Key, we will need it later. Your page should now look like the below
+
+![UniFi Creating API Key](assets/unifi-subuser-create-api-key.png)
+
+6. Remove elevated permissions from the user
+
+Log back in as your normal account, head over to where we created the Greenlight UnifiApi account
+(On the left navigation bar (that runs the length of the page) click the *people* icon (`Admin & Users`))
+
+Open that account, click the **Gear Icon** then match the below
+
+We have unselected **Use a Predefined Role** and changed the *ufo* icon to `Site admin` and the *person* to `None`
+
+![UniFi remove excess permissions](assets/change-superadmin-account-to-site-admin.png)
+
+You're probably thinking *wow, that was long*, and it's because only super admins can create API Keys, but they do not need
+those permissions the entire time to be able to *have* API Key attached to that user. It's a ~bug~ feature in UniFi
+
+The `Site Admin` permissions are more than enough to allow that user to create and manage records in our controller
+
+7. Create a Kubernetes secret called `greenlight-secret` that will hold your `UNIFI_API_KEY` with their respected values from Step 3.
+
+```yaml
+---
+apiVersion: v1
+kind: Secret
+metadata:
+    name: greenlight-secret
+stringData:
+  UNIFI_API_KEY: <your-api-key>
+```
 
 ```env
+UNIFI_HOST=https://192.168.1.1
 UNIFI_API_KEY=your-key-here
 ```
 
@@ -103,6 +162,7 @@ UNIFI_API_KEY=your-key-here
 Set `UNIFI_USERNAME` and `UNIFI_PASSWORD` in your `.env`. The app manages login sessions automatically and re-authenticates when the session expires.
 
 ```env
+UNIFI_HOST=https://192.168.1.1
 UNIFI_USERNAME=admin
 UNIFI_PASSWORD=changeme
 ```
@@ -115,18 +175,18 @@ The container defaults to UID/GID `1000`. Override at build or runtime:
 
 ```bash
 # Build-time
-docker build --build-arg APP_UID=1500 --build-arg APP_GID=1500 -t greenlight .
+docker build --build-arg APP_UID=65534 --build-arg APP_GID=65534 -t greenlight .
 
 # Docker Compose (via environment or .env)
-APP_UID=1500 APP_GID=1500 docker compose up -d --build
+APP_UID=65534 APP_GID=65534 docker compose up -d --build
 ```
 
 For Kubernetes, use `securityContext`:
 
 ```yaml
 securityContext:
-  runAsUser: 1500
-  runAsGroup: 1500
+  runAsUser: 65534
+  runAsGroup: 65534
   runAsNonRoot: true
   allowPrivilegeEscalation: false
 ```
