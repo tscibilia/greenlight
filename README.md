@@ -12,6 +12,20 @@
 
 > A lightweight web UI for managing the allowlist on UniFi's ad-blocking content filter. Designed so family members on your local network can greenlight a website without needing access to the UniFi controller. Full disclosure, this is a vibe coded solution for personal use :robot:
 
+<div align="center">
+
+![Greenlight UI](assets/ui-example.png)
+
+<details>
+<summary>See it in action</summary>
+<br>
+
+![Greenlight UI demo](assets/ui-example.gif)
+
+</details>
+
+</div>
+
 ## Features
 
 - Add or remove domains from the content filter allowlist
